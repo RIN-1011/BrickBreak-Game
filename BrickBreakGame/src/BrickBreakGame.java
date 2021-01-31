@@ -3,6 +3,7 @@ import java.awt.Color;
 import java.awt.Container;
 import java.awt.Font;
 import java.awt.Graphics;
+import java.awt.Paint;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.image.BufferedImage;
@@ -10,6 +11,11 @@ import java.io.File;
 import java.io.IOException;
 
 import javax.imageio.ImageIO;
+import javax.sound.sampled.AudioInputStream;
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.Clip;
+import javax.sound.sampled.LineUnavailableException;
+import javax.sound.sampled.UnsupportedAudioFileException;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -41,12 +47,23 @@ class UI extends JFrame {
 	class TitleUI extends JPanel implements KeyListener{
 		public BufferedImage backImage;
 		JLabel titleLabel1, titleLabel2, titleLabel3, flickeringLabel;
-		Container titleC;
+		Clip clip;
 		
 		TitleUI() {
 			try {
 				backImage = ImageIO.read(new File("TitleBackImg.jpg"));
-			} catch (IOException e) {
+				clip = AudioSystem.getClip();
+				File audioFile = new File("Start.wav");
+				AudioInputStream audioStream = AudioSystem.getAudioInputStream(audioFile);
+				clip.open(audioStream);
+			} 
+			catch (LineUnavailableException e) {
+				e.printStackTrace();
+			}
+			catch (UnsupportedAudioFileException e) {
+				e.printStackTrace();
+			}
+			catch (IOException e) {
 				e.printStackTrace();
 			}
 			this.setLayout(null);
@@ -54,6 +71,8 @@ class UI extends JFrame {
 			this.setFocusable(true);
 			this.requestFocus();
 			this.addKeyListener(this);
+			
+			clip.start();
 			
 			titleLabel1 = new JLabel("Java Programming");
 			titleLabel1.setHorizontalAlignment(JLabel.CENTER);
@@ -140,6 +159,7 @@ class UI extends JFrame {
 	}
 	class MainUI extends JPanel {
 		public BufferedImage backImage;
+		Paint gPaint1;
 		
 		MainUI(){
 			try {
@@ -151,6 +171,9 @@ class UI extends JFrame {
 		protected void paintComponent(Graphics g) {
 			super.paintComponents(g);
 			g.drawImage(backImage, 0, 0, getWidth(), getHeight(), null);
+			g.setColor(Color.LIGHT_GRAY);
+			g.fillRoundRect(5, 5, 300, 200, 30, 30);
+			
 		}
 	}
 	
