@@ -159,6 +159,7 @@ class UI extends JFrame {
 		public BufferedImage backImage;
 		int eventBlockCnt = 0;
 		int eventBlockNum[];
+		Color normalColor, EventColor;
 
 		MainUI() {
 			try {
@@ -166,114 +167,100 @@ class UI extends JFrame {
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
-
-			eventBlockCnt = (int)(Math.random()*3)+1;
-			eventBlockNum = new int[eventBlockCnt];
-			
-			int i, j, k;
-			for(i=0; i<eventBlockCnt; i++) {
-				int randomNum = (int)(Math.random()*9)+1;
-				for(j=0; j<i; j++) {
-					if(eventBlockNum[j] == randomNum) {
-						i--;
-						break;
-					}
-				}
-				if(j==i) {
-					eventBlockNum[i] = randomNum;
-				}
-			}
-			
-			int cnt=1;
-			
-			for(i=0; i<3; i++) {
-				for(j=0; j<3; j++) {
-					for(k=0; k<eventBlockCnt; k++) {
-						if(cnt == eventBlockNum[k]) {
-							break;
-						}
-					}
-					if(k==eventBlockCnt) {
-						NormalBlock nomalBlock = new NormalBlock(j*300+5, i*160+5, 300, 160);
-					}
-					else {
-						EventBlock eventBlock = new EventBlock(j*300+5, i*160+5, 300, 160);
-					}
-					cnt++;
-				}
-			}
 		}
 
 		protected void paintComponent(Graphics g) {
 			super.paintComponents(g);
 			g.drawImage(backImage, 0, 0, getWidth(), getHeight(), null);
 			
+			eventBlockCnt = (int) (Math.random() * 3) + 1;
+			eventBlockNum = new int[eventBlockCnt];
+
+			int i, j, k;
+			for (i = 0; i < eventBlockCnt; i++) {
+				int randomNum = (int) (Math.random() * 9) + 1;
+				for (j = 0; j < i; j++) {
+					if (eventBlockNum[j] == randomNum) {
+						i--;
+						break;
+					}
+				}
+				if (j == i) {
+					eventBlockNum[i] = randomNum;
+				}
+			}
+
+			int cnt = 1;
 			
+			for (i = 0; i < 3; i++) {
+				for (j = 0; j < 3; j++) {
+					for (k = 0; k < eventBlockCnt; k++) {
+						if (cnt == eventBlockNum[k]) {
+							break;
+						}
+					}
+					
+					int x = (int)(j * (320 + 10));
+					int y = (int)(i * (160 + 10));
+					int w = 320;
+					int h = 160;
+					
+					if (k == eventBlockCnt) {
+						NormalBlock nomalBlock = new NormalBlock();
+						normalColor = nomalBlock.setColor();
+
+						Graphics2D g2 = (Graphics2D) g;
+
+						GradientPaint gp = new GradientPaint((int)((j * 320 + 5) / 2), (int)(i * 160 + 5),
+								Color.WHITE, (int)((j * 320 + 5) / 2), (int)((i + 1) * 160 + 5), Color.BLACK);
+						
+						g.setColor(normalColor);
+						g.fillRoundRect(x, y+5, w, h, 30, 30);
+
+						g2.setStroke(new BasicStroke(3, BasicStroke.CAP_ROUND, 0));
+						g2.setPaint(gp);
+						g2.drawRoundRect(x, y+5, w, h, 30, 30);
+					} 
+					else {
+						EventBlock eventBlock = new EventBlock();
+						EventColor = eventBlock.setColor();
+
+						Graphics2D g2 = (Graphics2D) g;
+
+						GradientPaint gp = new GradientPaint((int)((j * 320 + 5) / 2), (int)(i * 160 + 5),
+								Color.WHITE, (int)((j * 320 + 5) / 2), (int)((i + 1) * 160 + 5), Color.BLACK);
+
+						g.setColor(EventColor);
+						g.fillRoundRect(x, y+5, w, h, 30, 30);
+
+						g2.setStroke(new BasicStroke(3, BasicStroke.CAP_ROUND, 0));
+						g2.setPaint(gp);
+						g2.drawRoundRect(x, y+5, w, h, 30, 30);
+					}
+					cnt++;
+				}
+			}
 		}
 
 		abstract class Block extends JPanel {
-			public abstract void paintComponent(Graphics g);
+			public abstract Color setColor();
 		}
 
 		class NormalBlock extends Block {
-			int x, y, w, h;
-
-			NormalBlock() {}
-
-			NormalBlock(int x, int y, int w, int h) {
-				System.out.println("ÀÏ¹Ý");
-				this.x = x;
-				this.y = y;
-				this.w = w;
-				this.h = h;
-			}
-
 			@Override
-			public void paintComponent(Graphics g) {
-				// TODO Auto-generated method stub\
-				Graphics2D g2 = (Graphics2D) g;
-
-				GradientPaint gp = new GradientPaint((int) ((x + w) / 2), y, Color.WHITE, (int) ((x + w) / 2),
-						(int) ((y + h) / 2), Color.BLACK);
-
-				g.setColor(new Color(68, 31, 8));
-				g.fillRoundRect(x, y, w, h, 30, 30);
-
-				g2.setStroke(new BasicStroke(3, BasicStroke.CAP_ROUND, 0));
-				g2.setPaint(gp);
-				g2.drawRoundRect(x, y, w, h, 30, 30);
+			public Color setColor() {
+				// TODO Auto-generated method stub
+				return new Color(68, 31, 8);
 			}
 		}
 
 		class EventBlock extends Block {
-			int x, y, w, h;
-
-			EventBlock(){}
-
-			EventBlock(int x, int y, int w, int h){
-				this.x = x;
-				this.y = y;
-				this.w = w;
-				this.h = h;
-			}
-
 			@Override
-			public void paintComponent(Graphics g) {
-				// TODO Auto-generated method stub\
-				Graphics2D g2 = (Graphics2D) g;
-
-				GradientPaint gp = new GradientPaint((int) ((x + w) / 2), y, Color.WHITE, (int) ((x + w) / 2),
-						(int) ((y + h) / 2), Color.BLACK);
-
-				g.setColor(new Color(249, 164, 39));
-				g.fillRoundRect(x, y, w, h, 30, 30);
-
-				g2.setStroke(new BasicStroke(3, BasicStroke.CAP_ROUND, 0));
-				g2.setPaint(gp);
-				g2.drawRoundRect(x, y, w, h, 30, 30);
+			public Color setColor() {
+				// TODO Auto-generated method stub
+				return new Color(249, 164, 39);
 			}
 		}
-
 	}
 
 	public class EndUI extends JPanel {
