@@ -14,37 +14,46 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
-class View extends JFrame {
-	public TitleView titleView = new TitleView();
+class UI extends JFrame {
+	public TitleUI titleUI = new TitleUI();
+	public MainUI mainUI = new MainUI();
+	public EndUI EndUI = new EndUI();
 	
 	public Container c;
 	public CardLayout card;
 	
-	View(){
+	UI(){
 		setTitle("º®µ¹±ú±â °ÔÀÓ");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		
 		c = this.getContentPane();
 		card = new CardLayout();
 		
-		this.setLayout(card);
+		c.setLayout(card);
 		
-		add(titleView, "title");
+		add(titleUI, "title");
+		add(mainUI, "main");
+		add(EndUI, "End");
 		
 		setVisible(true);
 		setSize(1000,1000);
 	}
-	public class TitleView extends JPanel{
+	class TitleUI extends JPanel implements KeyListener{
 		public BufferedImage backImage;
 		JLabel titleLabel1, titleLabel2, titleLabel3, flickeringLabel;
+		Container titleC;
 		
-		TitleView() {
+		TitleUI() {
 			try {
 				backImage = ImageIO.read(new File("TitleBackImg.jpg"));
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
-			setLayout(null);
+			this.setLayout(null);
+			
+			this.setFocusable(true);
+			this.requestFocus();
+			this.addKeyListener(this);
 			
 			titleLabel1 = new JLabel("Java Programming");
 			titleLabel1.setHorizontalAlignment(JLabel.CENTER);
@@ -62,7 +71,7 @@ class View extends JFrame {
 			titleLabel3.setForeground(new Color(57, 3, 101));
 			titleLabel3.setBounds(0, 400, 1000, 100);
 			
-			flickeringLabel = new JLabel("PRESS SPACEBAR TO PLAY!");
+			FlickeringLabel flickeringLabel = new FlickeringLabel("PRESS SPACEBAR TO PLAY!");
 			flickeringLabel.setHorizontalAlignment(JLabel.CENTER);
 			flickeringLabel.setFont(new Font("¸¼Àº°íµñ", Font.BOLD, 40));
 			flickeringLabel.setForeground(Color.RED);
@@ -73,7 +82,88 @@ class View extends JFrame {
 			add(titleLabel3);
 			add(flickeringLabel);
 		}
+		protected void paintComponent(Graphics g) {
+			super.paintComponents(g);
+			g.drawImage(backImage, 0, 0, getWidth(), getHeight(), null);
+		}
 		
+		class FlickeringLabel extends JLabel implements Runnable{
+			FlickeringLabel(String str){
+				super(str);
+				
+				Thread thread = new Thread(this);
+				thread.start();
+			}
+			
+			@Override
+			public void run() {
+				// TODO Auto-generated method stub
+				int n = 0;
+				while(true) {
+					if(n==0) {
+						setVisible(true);
+					}
+					else {
+						setVisible(false);
+					}
+					if(n==0) {
+						n = 1;
+					}
+					else {
+						n = 0;
+					}
+					try {
+						Thread.sleep(120);
+					} catch(InterruptedException e) {
+						return;
+					}
+				}
+			}
+		}
+		@Override
+		public void keyPressed(KeyEvent arg0) {
+			// TODO Auto-generated method stub
+			if(arg0.getKeyCode() == KeyEvent.VK_SPACE) {
+				card.show(c, "main");
+			}
+		}
+		@Override
+		public void keyReleased(KeyEvent arg0) {
+			// TODO Auto-generated method stub
+			
+		}
+		@Override
+		public void keyTyped(KeyEvent arg0) {
+			// TODO Auto-generated method stub
+			
+		}
+	}
+	class MainUI extends JPanel {
+		public BufferedImage backImage;
+		
+		MainUI(){
+			try {
+				backImage = ImageIO.read(new File("MainBackImg.jpg"));
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+		protected void paintComponent(Graphics g) {
+			super.paintComponents(g);
+			g.drawImage(backImage, 0, 0, getWidth(), getHeight(), null);
+		}
+	}
+	
+	public class EndUI extends JPanel {
+		public BufferedImage backImage;
+		
+		EndUI(){
+			try {
+				backImage = ImageIO.read(new File("TitleBackImg.jpg"));
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
 		protected void paintComponent(Graphics g) {
 			super.paintComponents(g);
 			g.drawImage(backImage, 0, 0, getWidth(), getHeight(), null);
@@ -83,7 +173,7 @@ class View extends JFrame {
 
 public class BrickBreakGame {
 	BrickBreakGame(){
-		View ui = new View();
+		UI ui = new UI();
 	}
 	
 	public static void main(String[] args) {
