@@ -1,5 +1,7 @@
 import java.awt.BasicStroke;
+import java.awt.CardLayout;
 import java.awt.Color;
+import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GradientPaint;
@@ -7,7 +9,6 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -103,21 +104,21 @@ public class BrickBreakGame extends JFrame {
 	public MainUI mainUI = new MainUI();
 	public EndUI endUI = new EndUI();
 	Clip startClip, endClip;
+	Container c;
+	CardLayout card;
 	
 	BrickBreakGame() {
 		setTitle("BrickBreakGame");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-
-		titleUI.setVisible(false);
-		endUI.setVisible(false);
-
-		titleUI.setBounds(0, 0, 1000, 1000);
-		mainUI.setBounds(0, 0, 1000, 1000);
-		endUI.setBounds(0, 0, 1000, 1000);
 		
-		add(titleUI);
-		add(mainUI);
-		add(endUI);
+		c = getContentPane();
+		card = new CardLayout();
+
+		c.setLayout(card);
+		
+		add(titleUI, "title");
+		add(mainUI, "main");
+		add(endUI, "end");
 
 		setSize(1000, 1000);
 		setVisible(true);
@@ -128,7 +129,8 @@ public class BrickBreakGame extends JFrame {
 	class TitleUI extends JPanel {
 		public BufferedImage backImage;
 		JLabel titleLabel1, titleLabel2, titleLabel3, flickeringLabel;
-		Thread thread;
+		
+		Thread startThread;
 
 		TitleUI() {
 			try {
@@ -190,9 +192,7 @@ public class BrickBreakGame extends JFrame {
 			public void keyPressed(KeyEvent arg0) {
 				// TODO Auto-generated method stub
 				if (arg0.getKeyCode() == KeyEvent.VK_SPACE) {
-					titleUI.setVisible(false);
-					mainUI.setVisible(true);
-					endUI.setVisible(false);
+					card.show(c, "main");
 				}
 			}
 		}
@@ -201,8 +201,8 @@ public class BrickBreakGame extends JFrame {
 			FlickeringLabel(String str) {
 				super(str);
 
-				thread = new Thread(this);
-				thread.start();
+				startThread = new Thread(this);
+				startThread.start();
 			}
 
 			@Override
@@ -244,6 +244,8 @@ public class BrickBreakGame extends JFrame {
 		int eventBlockCnt = 0;
 		int eventBlockNum[];
 
+		Thread mainThread;
+		
 		MainUI() {
 			try {
 				backImage = ImageIO.read(new File("MainBackImg.jpg"));
@@ -259,8 +261,8 @@ public class BrickBreakGame extends JFrame {
 
 			blockColorNum();
 
-			Thread th = new Thread(this);
-			th.start();
+			mainThread = new Thread(this);
+			mainThread.start();
 
 			ballvx = 0;
 			ballvy = -speed;
@@ -346,6 +348,7 @@ public class BrickBreakGame extends JFrame {
 				try {
 					Thread.sleep(30);
 				} catch (InterruptedException e) {
+					return;
 				}
 				updatePositionRacket();
 				updatePositionBall();
@@ -380,10 +383,9 @@ public class BrickBreakGame extends JFrame {
 				ballvy = -ballvy;
 			}
 			if(ballY>d.height) {
+				mainThread.interrupt();
 				endClip.start();
-				titleUI.setVisible(false);
-				mainUI.setVisible(false);
-				endUI.setVisible(true);
+				card.show(c, "end");
 			}
 			if (racketX - r < ballX && ballX < racketX + 250 - r
 				&& racketY - r * 2 < ballY && racketY - r * 2 + 30 > ballY) {
@@ -412,7 +414,7 @@ public class BrickBreakGame extends JFrame {
 	class EndUI extends JPanel {
 		public BufferedImage backImage;
 		JLabel endLabel1, flickeringLabel;
-		Thread thread;
+		Thread endThread;
 		
 		EndUI(){
 			try {
@@ -458,9 +460,8 @@ public class BrickBreakGame extends JFrame {
 			public void keyPressed(KeyEvent arg0) {
 				// TODO Auto-generated method stub
 				if (arg0.getKeyCode() == KeyEvent.VK_SPACE) {
-					titleUI.setVisible(true);
-					mainUI.setVisible(false);
-					endUI.setVisible(false);
+					endThread.interrupt();
+					card.show(c, "title");
 				}
 			}
 		}
@@ -469,8 +470,8 @@ public class BrickBreakGame extends JFrame {
 			FlickeringLabel(String str) {
 				super(str);
 
-				thread = new Thread(this);
-				thread.start();
+				endThread = new Thread(this);
+				endThread.start();
 			}
 
 			@Override
