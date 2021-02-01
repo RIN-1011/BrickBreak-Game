@@ -192,6 +192,7 @@ public class BrickBreakGame extends JFrame {
 			public void keyPressed(KeyEvent arg0) {
 				// TODO Auto-generated method stub
 				if (arg0.getKeyCode() == KeyEvent.VK_SPACE) {
+					startThread.interrupt();
 					card.show(c, "main");
 				}
 			}
@@ -223,6 +224,7 @@ public class BrickBreakGame extends JFrame {
 					try {
 						Thread.sleep(120);
 					} catch (InterruptedException e) {
+						System.out.println("타이틀 스레드 종료!");
 						return;
 					}
 				}
@@ -385,7 +387,7 @@ public class BrickBreakGame extends JFrame {
 			if(ballY>d.height) {
 				mainThread.interrupt();
 				endClip.start();
-				card.show(c, "end");
+				//card.show(c, "end");
 			}
 			if (racketX - r < ballX && ballX < racketX + 250 - r
 				&& racketY - r * 2 < ballY && racketY - r * 2 + 30 > ballY) {
