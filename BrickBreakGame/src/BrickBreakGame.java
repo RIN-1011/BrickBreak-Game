@@ -49,11 +49,12 @@ class NormalBlock extends Block {
 		g2.drawRoundRect(x, y + 5, w, h, 30, 30);
 	}
 }
+
 class EventBlock extends Block {
-	EventBlock(Graphics g, int i, int j, int x, int y, int w, int h){
+	EventBlock(Graphics g, int i, int j, int x, int y, int w, int h) {
 		paintBlock(g, i, j, x, y, w, h);
 	}
-	
+
 	@Override
 	public void paintBlock(Graphics g, int i, int j, int x, int y, int w, int h) {
 		// TODO Auto-generated method stub
@@ -78,7 +79,14 @@ public class BrickBreakGame extends JFrame {
 	Clip startClip, endClip;
 	Container c;
 	CardLayout card;
-	Thread mainThread;
+	Thread mainThread, startThread, endThread;
+
+	int flag = 2;
+	float ballX = 495, ballY = 845;
+	float ballvx, ballvy;
+	float racketX = 370, racketY = 870;
+	float racketvx = 0;
+	int speed;
 
 	BrickBreakGame() {
 		setTitle("BrickBreakGame");
@@ -93,17 +101,80 @@ public class BrickBreakGame extends JFrame {
 		add(mainUI, "main");
 		add(endUI, "end");
 
+		this.setFocusable(true);
+		this.requestFocus();
+		this.addKeyListener(new MyKeyListener());
+
 		setSize(1000, 1000);
 		setVisible(true);
 	}
 
+	class MyKeyListener extends KeyAdapter {
+		public void keyPressed(KeyEvent arg0) {
+			// TODO Auto-generated method stub
+			if (arg0.getKeyCode() == KeyEvent.VK_SPACE) {
+				if (flag == 1) {
+					ballX = 495; ballY = 845;
+					ballvx = 10; ballvy = -speed;
+					racketX = 370; racketY = 870;
+					racketvx = 0;
+
+					card.show(c, "title");
+					flag = 2;
+				} else if (flag == 2) {
+					card.show(c, "main");
+					mainThread = new Thread(mainUI);
+					mainThread.start();
+					
+					
+				} else if (flag == 3) {
+					flag = 1;
+
+					mainThread = new Thread(mainUI);
+					mainThread.start();
+				}
+			}
+			if (flag == 2) {
+				switch (arg0.getKeyCode()) {
+				case KeyEvent.VK_LEFT: {
+					racketvx = -speed;
+					break;
+				}
+				case KeyEvent.VK_RIGHT: {
+					racketvx = speed;
+					break;
+				}
+				default:
+					break;
+				}
+			}
+		}
+
+		public void keyReleased(KeyEvent e) {
+			// TODO Auto-generated method stub
+			if (flag == 2) {
+				switch (e.getKeyCode()) {
+				case KeyEvent.VK_LEFT: {
+					racketvx = 0;
+					break;
+				}
+				case KeyEvent.VK_RIGHT: {
+					racketvx = 0;
+					break;
+				}
+				default:
+					break;
+				}
+			}
+		}
+
+	}
+
 	//////////////////////////// 시작 화면//////////////////////////////////
 
-	class TitleUI extends JPanel implements KeyListener {
+	class TitleUI extends JPanel {
 		public BufferedImage backImage;
 		JLabel titleLabel1, titleLabel2, titleLabel3, flickeringLabel;
-
-		Thread startThread;
 
 		TitleUI() {
 			try {
@@ -120,10 +191,6 @@ public class BrickBreakGame extends JFrame {
 				e.printStackTrace();
 			}
 			this.setLayout(null);
-
-			this.setFocusable(true);
-			this.requestFocus();
-			this.addKeyListener(this);
 
 			startClip.start();
 
@@ -186,54 +253,25 @@ public class BrickBreakGame extends JFrame {
 					try {
 						Thread.sleep(120);
 					} catch (InterruptedException e) {
-						System.out.println("타이틀 스레드 종료!");
 						return;
 					}
 				}
 			}
 		}
-
-		@Override
-		public void keyPressed(KeyEvent arg0) {
-			// TODO Auto-generated method stub
-			if (arg0.getKeyCode() == KeyEvent.VK_SPACE) {
-				startThread.interrupt();
-
-				card.show(c, "main");
-				mainThread = new Thread(mainUI);
-				mainThread.start();
-			}
-		}
-
-		@Override
-		public void keyReleased(KeyEvent arg0) {
-			// TODO Auto-generated method stub
-
-		}
-
-		@Override
-		public void keyTyped(KeyEvent arg0) {
-			// TODO Auto-generated method stub
-
-		}
 	}
 
 ////////////////////////////메인 화면//////////////////////////////////
 
-	class MainUI extends JPanel implements Runnable, KeyListener {
+	class MainUI extends JPanel implements Runnable{
 		public BufferedImage backImage;
-		float ballX = 495, ballY = 855;
-		float ballvx = 0, ballvy = 0;
+
 		float r = 12;
-		float racketX = 370, racketY = 870;
-		float racketvx = 0;
-		int speed;
 		int eventBlockCnt = 0;
 		int eventBlockNum[];
 
 		LinkedList<NormalBlock> normalList = new LinkedList<NormalBlock>();
 		LinkedList<EventBlock> eventList = new LinkedList<EventBlock>();
-		
+
 		MainUI() {
 			try {
 				backImage = ImageIO.read(new File("MainBackImg.jpg"));
@@ -252,9 +290,6 @@ public class BrickBreakGame extends JFrame {
 			speed = 20;
 
 			this.setLayout(null);
-			this.setFocusable(true);
-			this.requestFocus();
-			this.addKeyListener(this);
 
 			blockColorNum();
 
@@ -333,6 +368,7 @@ public class BrickBreakGame extends JFrame {
 				try {
 					Thread.sleep(30);
 				} catch (InterruptedException e) {
+					System.out.println("메인 스레드 종료!");
 					return;
 				}
 				updatePositionRacket();
@@ -369,6 +405,7 @@ public class BrickBreakGame extends JFrame {
 				mainThread.interrupt();
 				endClip.start();
 				card.show(c, "end");
+				flag = 1;
 			}
 			if (racketX - r < ballX && ballX < racketX + 250 - r && racketY - r * 2 < ballY
 					&& racketY - r * 2 + 30 > ballY) {
@@ -390,46 +427,6 @@ public class BrickBreakGame extends JFrame {
 
 			repaint();
 		}
-
-		@Override
-		public void keyPressed(KeyEvent e) {
-			// TODO Auto-generated method stub
-			switch (e.getKeyCode()) {
-			case KeyEvent.VK_LEFT: {
-				racketvx = -speed;
-				break;
-			}
-			case KeyEvent.VK_RIGHT: {
-				racketvx = speed;
-				break;
-			}
-			default:
-				break;
-			}
-		}
-
-		@Override
-		public void keyReleased(KeyEvent e) {
-			// TODO Auto-generated method stub
-			switch (e.getKeyCode()) {
-			case KeyEvent.VK_LEFT: {
-				racketvx = 0;
-				break;
-			}
-			case KeyEvent.VK_RIGHT: {
-				racketvx = 0;
-				break;
-			}
-			default:
-				break;
-			}
-		}
-
-		@Override
-		public void keyTyped(KeyEvent e) {
-			// TODO Auto-generated method stub
-
-		}
 	}
 
 	//////////////////////////// 종료 화면//////////////////////////////////
@@ -437,7 +434,6 @@ public class BrickBreakGame extends JFrame {
 	class EndUI extends JPanel {
 		public BufferedImage backImage;
 		JLabel endLabel1, flickeringLabel;
-		Thread endThread;
 
 		EndUI() {
 			try {
@@ -446,10 +442,6 @@ public class BrickBreakGame extends JFrame {
 				e.printStackTrace();
 			}
 			this.setLayout(null);
-
-			this.setFocusable(true);
-			this.requestFocus();
-			this.addKeyListener(new MyKeyAdapter());
 
 			endLabel1 = new JLabel("GAME OVER");
 			endLabel1.setHorizontalAlignment(JLabel.CENTER);
@@ -469,17 +461,6 @@ public class BrickBreakGame extends JFrame {
 		protected void paintComponent(Graphics g) {
 			super.paintComponents(g);
 			g.drawImage(backImage, 0, 0, getWidth(), getHeight(), null);
-		}
-
-		class MyKeyAdapter extends KeyAdapter {
-			@Override
-			public void keyPressed(KeyEvent arg0) {
-				// TODO Auto-generated method stub
-				if (arg0.getKeyCode() == KeyEvent.VK_SPACE) {
-					endThread.interrupt();
-					card.show(c, "title");
-				}
-			}
 		}
 
 		class FlickeringLabel extends JLabel implements Runnable {
