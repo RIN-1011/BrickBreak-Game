@@ -116,10 +116,10 @@ public class BrickBreakGame extends JFrame {
 
 		c.setLayout(card);
 		
-		add(titleUI, "title");
-		add(mainUI, "main");
-		add(endUI, "end");
-
+		this.add(titleUI, "title");
+		this.add(mainUI, "main");
+		this.add(endUI, "end");
+		
 		setSize(1000, 1000);
 		setVisible(true);
 	}
@@ -251,6 +251,14 @@ public class BrickBreakGame extends JFrame {
 		MainUI() {
 			try {
 				backImage = ImageIO.read(new File("MainBackImg.jpg"));
+				endClip = AudioSystem.getClip();
+				File audioFile = new File("Fail.wav");
+				AudioInputStream audioStream = AudioSystem.getAudioInputStream(audioFile);
+				endClip.open(audioStream);
+			} catch (LineUnavailableException e) {
+				e.printStackTrace();
+			} catch (UnsupportedAudioFileException e) {
+				e.printStackTrace();
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
@@ -358,12 +366,10 @@ public class BrickBreakGame extends JFrame {
 		}
 
 		void updatePositionRacket() {
-			Dimension d = getSize();
-
 			racketX += racketvx;
 
-			if (racketX > d.width - 250) {
-				racketX = d.width - 250;
+			if (racketX > 982 - 250) {
+				racketX = 982 - 250;
 				racketvx = 0;
 			}
 			if (racketX < 0) {
@@ -373,21 +379,19 @@ public class BrickBreakGame extends JFrame {
 			repaint();
 		}
 		void updatePositionBall() {
-			Dimension d = getSize();
-
 			ballX += ballvx;
 			ballY += ballvy;
 
-			if(ballX<0 || ballX>d.width - r*2) {
+			if(ballX<12 || ballX>985 - r*2) {
 				ballvx = -ballvx;
 			}
-			if(ballY < 0) {
+			if(ballY < 12) {
 				ballvy = -ballvy;
 			}
-			if(ballY>d.height) {
+			if(ballY>953) {
 				mainThread.interrupt();
 				endClip.start();
-				//card.show(c, "end");
+				card.show(c, "end");
 			}
 			if (racketX - r < ballX && ballX < racketX + 250 - r
 				&& racketY - r * 2 < ballY && racketY - r * 2 + 30 > ballY) {
@@ -421,14 +425,6 @@ public class BrickBreakGame extends JFrame {
 		EndUI(){
 			try {
 				backImage = ImageIO.read(new File("BackImg.jpg"));
-				endClip = AudioSystem.getClip();
-				File audioFile = new File("Fail.wav");
-				AudioInputStream audioStream = AudioSystem.getAudioInputStream(audioFile);
-				endClip.open(audioStream);
-			} catch (LineUnavailableException e) {
-				e.printStackTrace();
-			} catch (UnsupportedAudioFileException e) {
-				e.printStackTrace();
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
