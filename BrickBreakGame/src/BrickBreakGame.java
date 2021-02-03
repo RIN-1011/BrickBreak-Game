@@ -76,7 +76,7 @@ public class BrickBreakGame extends JFrame {
 	public TitleUI titleUI = new TitleUI();
 	public MainUI mainUI = new MainUI();
 	public EndUI endUI = new EndUI();
-	Clip startClip, endClip;
+	Clip startClip, endClip, bounceClip;
 	Container c;
 	CardLayout card;
 	Thread mainThread, startThread, endThread;
@@ -436,6 +436,19 @@ public class BrickBreakGame extends JFrame {
 			}
 			if (racketX - r < ballX && ballX < racketX + 250 - r && racketY - r * 2 < ballY
 					&& racketY - r * 2 + 30 > ballY) {
+				try {
+					bounceClip = AudioSystem.getClip();
+					File audioFile = new File("Bounce.wav");
+					AudioInputStream audioStream = AudioSystem.getAudioInputStream(audioFile);
+					bounceClip.open(audioStream);
+				} catch (LineUnavailableException e) {
+					e.printStackTrace();
+				} catch (UnsupportedAudioFileException e) {
+					e.printStackTrace();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+				bounceClip.start();
 				ballvy = -ballvy;
 
 				if (ballX < racketX - r + 250 / 5) {
