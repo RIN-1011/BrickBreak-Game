@@ -76,7 +76,7 @@ public class BrickBreakGame extends JFrame {
 	public TitleUI titleUI = new TitleUI();
 	public MainUI mainUI = new MainUI();
 	public EndUI endUI = new EndUI();
-	Clip startClip, endClip;
+	Clip startClip, endClip, bounceClip;
 	Container c;
 	CardLayout card;
 	Thread mainThread, startThread, endThread;
@@ -118,15 +118,30 @@ public class BrickBreakGame extends JFrame {
 					ballvx = 10; ballvy = -speed;
 					racketX = 370; racketY = 870;
 					racketvx = 0;
-
+					
+					endClip.stop();
 					card.show(c, "title");
+					try {
+						startClip = AudioSystem.getClip();
+						File audioFile = new File("Start.wav");
+						AudioInputStream audioStream = AudioSystem.getAudioInputStream(audioFile);
+						startClip.open(audioStream);
+					} catch (LineUnavailableException e) {
+						e.printStackTrace();
+					} catch (UnsupportedAudioFileException e) {
+						e.printStackTrace();
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+					startClip.start();
+					
 					flag = 2;
 				} else if (flag == 2) {
+					startClip.stop();
 					card.show(c, "main");
+					
 					mainThread = new Thread(mainUI);
 					mainThread.start();
-					
-					
 				} else if (flag == 3) {
 					flag = 1;
 
@@ -403,12 +418,37 @@ public class BrickBreakGame extends JFrame {
 
 			if (ballY > 953) {
 				mainThread.interrupt();
+				try {
+					endClip = AudioSystem.getClip();
+					File audioFile = new File("Fail.wav");
+					AudioInputStream audioStream = AudioSystem.getAudioInputStream(audioFile);
+					endClip.open(audioStream);
+				} catch (LineUnavailableException e) {
+					e.printStackTrace();
+				} catch (UnsupportedAudioFileException e) {
+					e.printStackTrace();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
 				endClip.start();
 				card.show(c, "end");
 				flag = 1;
 			}
 			if (racketX - r < ballX && ballX < racketX + 250 - r && racketY - r * 2 < ballY
 					&& racketY - r * 2 + 30 > ballY) {
+				try {
+					bounceClip = AudioSystem.getClip();
+					File audioFile = new File("Bounce.wav");
+					AudioInputStream audioStream = AudioSystem.getAudioInputStream(audioFile);
+					bounceClip.open(audioStream);
+				} catch (LineUnavailableException e) {
+					e.printStackTrace();
+				} catch (UnsupportedAudioFileException e) {
+					e.printStackTrace();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+				bounceClip.start();
 				ballvy = -ballvy;
 
 				if (ballX < racketX - r + 250 / 5) {
