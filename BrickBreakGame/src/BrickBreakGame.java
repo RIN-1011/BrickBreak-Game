@@ -6,13 +6,14 @@ import java.awt.Font;
 import java.awt.GradientPaint;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.Point;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.LinkedList;
+import java.util.ListIterator;
 
 import javax.imageio.ImageIO;
 import javax.sound.sampled.AudioInputStream;
@@ -29,8 +30,11 @@ abstract class Block extends JPanel { // 추상클래스
 }
 
 class NormalBlock extends Block {
+	Point pointLT, pointRT, pointLB, pointRB;
+	
 	NormalBlock(Graphics g, int i, int j, int x, int y, int w, int h) {
 		paintBlock(g, i, j, x, y, w, h);
+		pointBlock(x, y, w, h);
 	}
 
 	@Override
@@ -48,9 +52,16 @@ class NormalBlock extends Block {
 		g2.setPaint(gp);
 		g2.drawRoundRect(x, y + 5, w, h, 30, 30);
 	}
+	public void pointBlock(int x, int y, int w, int h) {
+		pointLT = new Point(x, y+5);
+		pointRT = new Point(x+320, y+5);
+		pointLB = new Point(x, y+165);
+		pointRB = new Point(x+320, y+165);
+	}
 }
 
 class EventBlock extends Block {
+	
 	EventBlock(Graphics g, int i, int j, int x, int y, int w, int h) {
 		paintBlock(g, i, j, x, y, w, h);
 	}
@@ -81,7 +92,7 @@ public class BrickBreakGame extends JFrame {
 	CardLayout card;
 	Thread mainThread, startThread, endThread;
 
-	int flag = 2;
+	int flag = 2, blockCnt = 0;
 	float ballX = 495, ballY = 845;
 	float ballvx, ballvy;
 	float racketX = 370, racketY = 870;
@@ -321,7 +332,7 @@ public class BrickBreakGame extends JFrame {
 
 			g2.setColor(new Color(205, 244, 136));
 			g2.fillRoundRect((int) racketX, (int) racketY, 250, 30, 20, 20);
-
+			
 			paintBlock(g);
 
 			g2.setColor(Color.RED);
@@ -331,7 +342,7 @@ public class BrickBreakGame extends JFrame {
 		public void blockColorNum() {
 			eventBlockCnt = (int) (Math.random() * 3) + 1;
 			eventBlockNum = new int[eventBlockCnt];
-
+			
 			int i, j, k;
 
 			for (i = 0; i < eventBlockCnt; i++) {
@@ -365,12 +376,14 @@ public class BrickBreakGame extends JFrame {
 					int w = 320;
 					int h = 160;
 
-					if (k == eventBlockCnt) {
+					if (k == eventBlockCnt && blockCnt < 9) {
 						NormalBlock normalBlock = new NormalBlock(g, i, j, x, y, w, h);
 						normalList.add(normalBlock);
-					} else {
+						blockCnt++;
+					} else if(k != eventBlockCnt && blockCnt < 9) {
 						EventBlock eventBlock = new EventBlock(g, i, j, x, y, w, h);
 						eventList.add(eventBlock);
+						blockCnt++;
 					}
 					cnt++;
 				}
@@ -388,6 +401,7 @@ public class BrickBreakGame extends JFrame {
 				}
 				updatePositionRacket();
 				updatePositionBall();
+				System.out.println("끝");
 			}
 		}
 
@@ -464,8 +478,19 @@ public class BrickBreakGame extends JFrame {
 					ballvx = 12;
 				}
 			}
-
-			repaint();
+			
+			ListIterator<NormalBlock> normalIt = normalList.listIterator();
+			for (;normalIt.hasNext();) {
+				NormalBlock nb = normalIt.next();
+				System.out.println(nb.pointLB.x +" " + nb.pointRB.x);
+				/*if((ballX >= nb.pointLB.x)&&(ballX <= nb.pointRB.x)
+						&&(ballY == nb.pointLB.y)) {
+					ballvy = -ballvy;
+					normalIt.remove();
+					paint=1;
+				}*/
+				
+			}
 		}
 	}
 
