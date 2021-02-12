@@ -338,6 +338,8 @@ public class BrickBreakGame extends JFrame {
 		protected void paintComponent(Graphics g) {
 			normalCnt = 0;
 			eventCnt = 0;
+			removeNormalNum=0;
+			
 			super.paintComponents(g);
 			g.drawImage(backImage, 0, 0, getWidth(), getHeight(), null);
 
@@ -523,11 +525,15 @@ public class BrickBreakGame extends JFrame {
 				}
 			}
 			
+			//////////////////벽돌 깨기///////////////
+			
 			for (int i=0; i<normalArray.length; i++) {
-				if((ballX >= normalArray[i].pointLB.x)&&(ballX <= normalArray[i].pointRB.x)
-						&&(ballY == normalArray[i].pointLB.y)) {
-					ballvy = -ballvy;
-					removeNormal[removeNormalNum++] = i;
+				if(normalArray[i] != null) {
+					if((ballX >= normalArray[i].pointLB.x)&&(ballX <= normalArray[i].pointRB.x)
+							&&((ballY == normalArray[i].pointLB.y)||(ballY == normalArray[i].pointLT.y))) {
+						ballvy = -ballvy;
+						removeNormal[removeNormalNum++] = i;
+					}
 				}
 				mainUI.repaint();
 			}
