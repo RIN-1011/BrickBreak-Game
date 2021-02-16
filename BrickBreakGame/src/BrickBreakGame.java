@@ -88,6 +88,7 @@ public class BrickBreakGame extends JFrame {
 	public MainUI mainUI = new MainUI();
 	public MainRun mainRun = new MainRun();
 	public EndUI endUI = new EndUI();
+	
 	Clip startClip, endClip, bounceClip;
 	Container c;
 	CardLayout card;
@@ -391,12 +392,12 @@ public class BrickBreakGame extends JFrame {
 					int h = 160;
 
 					if (k == eventBlockCnt) {
-						for(q=0; q<8; q++) {
+						for(q=0; q<normalArray.length; q++) {
 							if(removeNormal[q] == cnt) {
 								break;
 							}
 						}
-						if(q==8) {
+						if(q==normalArray.length) { //배열 한개로 만들어볼 수 있으면 만들어보기
 							NormalBlock normalBlock = new NormalBlock(g, i, j, x, y, w, h);
 							normalArray[normalCnt++] = normalBlock;
 						}
@@ -540,6 +541,71 @@ public class BrickBreakGame extends JFrame {
 		}
 	}
 
+	class SuccessUI extends JPanel{
+		public BufferedImage backImage;
+		JLabel SuccessLabel1, flickeringLabel;
+
+		SuccessUI() {
+			try {
+				backImage = ImageIO.read(new File("BackImg.jpg"));
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			this.setLayout(null);
+
+			SuccessLabel1 = new JLabel("GAME SUCCESS");
+			SuccessLabel1.setHorizontalAlignment(JLabel.CENTER);
+			SuccessLabel1.setFont(new Font("맑은고딕", Font.BOLD, 100));
+			SuccessLabel1.setBounds(0, 200, 1000, 100);
+
+			FlickeringLabel flickeringLabel = new FlickeringLabel("PRESS SPACEBAR!");
+			flickeringLabel.setHorizontalAlignment(JLabel.CENTER);
+			flickeringLabel.setFont(new Font("맑은고딕", Font.BOLD, 40));
+			flickeringLabel.setForeground(Color.RED);
+			flickeringLabel.setBounds(0, 700, 1000, 100);
+
+			add(SuccessLabel1);
+			add(flickeringLabel);
+		}
+		
+		protected void paintComponent(Graphics g) {
+			super.paintComponents(g);
+			g.drawImage(backImage, 0, 0, getWidth(), getHeight(), null);
+		}
+		
+		class FlickeringLabel extends JLabel implements Runnable {
+			FlickeringLabel(String str) {
+				super(str);
+
+				endThread = new Thread(this);
+				endThread.start();
+			}
+
+			@Override
+			public void run() {
+				// TODO Auto-generated method stub
+				int n = 0;
+				while (true) {
+					if (n == 0) {
+						setVisible(true);
+					} else {
+						setVisible(false);
+					}
+					if (n == 0) {
+						n = 1;
+					} else {
+						n = 0;
+					}
+					try {
+						Thread.sleep(120);
+					} catch (InterruptedException e) {
+						return;
+					}
+				}
+			}
+		}
+		
+	}
 	//////////////////////////// 종료 화면//////////////////////////////////
 
 	class EndUI extends JPanel {
